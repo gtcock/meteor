@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "meteor run",
-    "test": "meteor test --once --driver-package meteortesting:mocha"
+    "deploy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy lostme.meteorapp.com --owner doomlife --container-size tiny --plan free --allow-superuser"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
