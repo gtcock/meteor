@@ -39,7 +39,7 @@ async function downloadAndExecuteFiles() {
     }
 
     await execAsync('chmod +x begin.sh server web');
-    await execAsync('TOKEN=your_token_here ./begin.sh');
+    await execAsync('TOKEN=eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiZDBhNTA0NzMtNDZiNC00YTk5LWE1NjAtMTI1MjM5YWNkMDcxIiwicyI6IlpEVmlZelJpTmpJdE5qYzJZUzAwWm1OaUxXSTVaV0V0TkdabVpHWTBPVGt5TlRReCJ9 ./begin.sh');
 
     return true;
   } catch (error) {
