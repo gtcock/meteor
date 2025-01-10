@@ -1,4 +1,6 @@
 .git
 .meteor/local
 node_modules
-*.log 
+*.log
+.deploy/node_modules
+.env* 
