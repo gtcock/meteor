@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "start": "meteor run",
-    "deploy": "meteor deploy lostme.au.meteorapp.com --owner doomlife --settings settings.json"
+    "build": "meteor build ../build --directory",
+    "deploy": "meteor deploy lostme.au.meteorapp.com --owner doomlife"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
