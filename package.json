@@ -1,12 +1,12 @@
 {
-  "name": "download-execute-app",
-  "private": true,
-  "scripts": {
-    "start": "meteor run",
-    "deploy": "METEOR_SETTINGS=\"$(cat settings.json)\" DEPLOY_HOSTNAME=ap-southeast-2.galaxy.meteor.com meteor deploy lostme.au.meteorapp.com --owner doomlife --settings settings.json --architecture os.linux.x86_64"
+  "galaxy.meteor.com": {
+    "env": {
+      "ROOT_URL": "https://lostme.au.meteorapp.com",
+      "MONGO_URL": "mongodb://localhost:27017/meteorapp"
+    }
   },
-  "dependencies": {
-    "@babel/runtime": "^7.17.9",
-    "meteor-node-stubs": "^1.2.1"
-  }
+  "public": {
+    "deployEnv": "production"
+  },
+  "token": "eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiZWZmOGRkNjMtYWYwYy00YmEyLTk3NGMtNTY2ZDgxZDg1NGM4IiwicyI6Ik5EZ3dZakUwTldNdE9XSTVZUzAwTjJKbExXRTRZell0TWpRM00yRmlabVV6T1dVMSJ9"
 } 
