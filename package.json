@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "meteor run",
-    "deploy": "DEPLOY_HOSTNAME=ap-southeast-2.galaxy.meteor.com meteor deploy lostme.au.meteorapp.com --owner doomlife --settings settings.json"
+    "deploy": "DEPLOY_HOSTNAME=ap-southeast-2.galaxy.meteor.com meteor deploy lostme.au.meteorapp.com --owner doomlife"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
