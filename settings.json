@@ -1,0 +1,8 @@
+{
+  "public": {},
+  "galaxy.meteor.com": {
+    "env": {
+      "ROOT_URL": "https://lostme.meteorapp.com"
+    }
+  }
+} 
