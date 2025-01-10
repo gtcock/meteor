@@ -1,7 +1,12 @@
 <head>
-  <title>hello-meteor</title>
+  <title>simple-hello</title>
 </head>
 
 <body>
-  <div id="react-target"></div>
-</body> 
+  <h1>Welcome to Meteor!</h1>
+  {{> hello}}
+</body>
+
+<template name="hello">
+  <p>Hello World!</p>
+</template> 
