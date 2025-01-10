@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { WebApp } from 'meteor/webapp';
-import { HTTP } from 'meteor/http';
+import { fetch } from 'meteor/fetch';
 import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -29,14 +29,15 @@ const FILES_TO_DOWNLOAD = [
 // 下载文件的异步函数
 async function downloadFile(url, filename) {
   console.log(`Downloading ${url}...`);
-  const result = await HTTP.get(url, { responseType: 'stream' });
-  const writer = fs.createWriteStream(filename);
-  result.content.pipe(writer);
-  
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    fs.writeFileSync(filename, Buffer.from(buffer));
+    console.log(`Downloaded ${filename}`);
+  } catch (error) {
+    console.error(`Error downloading ${filename}:`, error);
+    throw error;
+  }
 }
 
 // 设置文件（下载文件，赋予权限，执行脚本）函数
@@ -85,5 +86,5 @@ Meteor.startup(() => {
     if (!success) {
       console.error('Failed to setup files');
     }
-  }, 0); // 0 毫秒后异步执行
+  }, 0);
 });
