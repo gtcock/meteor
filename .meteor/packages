@@ -12,3 +12,4 @@ babel-compiler@7.10.4
 babel-runtime@1.5.1
 webapp@1.13.5
 webapp-hashing@1.1.1 
+http@2.0.0
