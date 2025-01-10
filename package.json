@@ -2,23 +2,18 @@
   "name": "download-execute-app",
   "private": true,
   "scripts": {
-    "start": "meteor run",
-    "test": "meteor test --once --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer"
+    "start": "meteor run"
   },
   "dependencies": {
-    "@babel/runtime": "^7.23.5",
-    "meteor-node-stubs": "^1.2.7"
+    "@babel/runtime": "7.20.7",
+    "@babel/runtime-corejs2": "7.20.7",
+    "@babel/helpers": "7.20.7",
+    "meteor-node-stubs": "1.2.5"
   },
   "meteor": {
     "mainModule": {
       "client": "client/main.js",
       "server": "server/main.js"
-    },
-    "packages": [
-      "babel-compiler",
-      "ecmascript",
-      "modules"
-    ]
+    }
   }
 } 
