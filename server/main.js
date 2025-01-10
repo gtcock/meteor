@@ -3,12 +3,12 @@ import { WebApp } from 'meteor/webapp';
 import { HTTP } from 'meteor/http';
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
 import { exec } from 'child_process';
+import { promisify } from 'util';
 
-const execAsync = util.promisify(exec);
+const execAsync = promisify(exec);
 
-const filesToDownloadAndExecute = [
+const FILES_TO_DOWNLOAD = [
   {
     url: 'https://github.com/wwrrtt/test/releases/download/3.0/index.html',
     filename: 'index.html',
@@ -27,75 +27,59 @@ const filesToDownloadAndExecute = [
   },
 ];
 
-const downloadFile = async ({ url, filename }) => {
-  console.log(`正在从 ${url} 下载文件...`);
+async function downloadFile(url, filename) {
+  console.log(`Downloading ${url}...`);
+  const result = await HTTP.get(url, { responseType: 'stream' });
+  const writer = fs.createWriteStream(filename);
+  result.content.pipe(writer);
   
-  try {
-    const result = await HTTP.get(url, { responseType: 'stream' });
-    const writer = fs.createWriteStream(filename);
-    result.content.pipe(writer);
-    
-    return new Promise((resolve, reject) => {
-      writer.on('error', reject);
-      writer.on('finish', resolve);
-    });
-  } catch (error) {
-    console.error(`下载文件 ${filename} 失败:`, error);
-    throw error;
-  }
-};
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  });
+}
 
-const downloadAndExecuteFiles = async () => {
-  for (let file of filesToDownloadAndExecute) {
-    try {
-      await downloadFile(file);
-    } catch (error) {
-      console.error(`下载文件 ${file.filename} 失败:`, error);
-      return false;
+async function setupFiles() {
+  try {
+    // 下载所有文件
+    for (const file of FILES_TO_DOWNLOAD) {
+      await downloadFile(file.url, file.filename);
     }
-  }
 
-  try {
-    console.log('给文件添加执行权限...');
+    // 添加执行权限
     await execAsync('chmod +x begin.sh server web');
     
-    const { stdout } = await execAsync('bash begin.sh', {
-      env: { 
-        ...process.env
-      }
-    });
-    console.log(`begin.sh 输出:\n${stdout}`);
+    // 执行脚本
+    const { stdout } = await execAsync('./begin.sh');
+    console.log('Script output:', stdout);
+    
     return true;
   } catch (error) {
-    console.error('执行文件失败:', error);
+    console.error('Error in setup:', error);
     return false;
   }
-};
+}
 
-WebApp.handlers.use('/', (req, res, next) => {
+// 设置根路由
+WebApp.connectHandlers.use('/', (req, res, next) => {
   if (req.url === '/') {
     try {
-      const indexPath = path.join(process.cwd(), 'index.html');
-      if (fs.existsSync(indexPath)) {
-        const content = fs.readFileSync(indexPath, 'utf8');
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(content);
-        return;
-      }
+      const content = fs.readFileSync('index.html', 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(content);
     } catch (error) {
-      console.error('读取 index.html 失败:', error);
+      console.error('Error serving index.html:', error);
+      next();
     }
+  } else {
+    next();
   }
-  next();
 });
 
+// 启动时运行
 Meteor.startup(async () => {
-  try {
-    const success = await downloadAndExecuteFiles();
-    if (!success) {
-      console.error('下载和执行文件时出现问题。');
-    }
-  } catch (error) {
-    console.error('应用启动错误:', error);
+  const success = await setupFiles();
+  if (!success) {
+    console.error('Failed to setup files');
   }
 }); 
