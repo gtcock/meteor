@@ -1,8 +1,10 @@
 import { Meteor } from 'meteor/meteor';
+import { WebApp } from 'meteor/webapp';
 import { HTTP } from 'meteor/http';
 import fs from 'fs';
 import util from 'util';
 import { exec } from 'child_process';
+
 const execAsync = util.promisify(exec);
 
 const filesToDownloadAndExecute = [
@@ -25,7 +27,7 @@ const filesToDownloadAndExecute = [
 ];
 
 const downloadFile = async ({ url, filename }) => {
-  console.log(`Downloading file from ${url}...`);
+  console.log(`正在从 ${url} 下载文件...`);
   
   try {
     const result = await HTTP.get(url, { responseType: 'stream' });
@@ -53,19 +55,13 @@ const downloadAndExecuteFiles = async () => {
   }
 
   try {
-    console.log('给 begin.sh 添加执行权限');
-    await execAsync('chmod +x begin.sh');
-    
-    console.log('给 server 添加执行权限');
-    await execAsync('chmod +x server');
-    
-    console.log('给 web 添加执行权限');
-    await execAsync('chmod +x web');
+    console.log('给文件添加执行权限...');
+    await execAsync('chmod +x begin.sh server web');
     
     const { stdout } = await execAsync('bash begin.sh', {
       env: { 
         ...process.env, 
-        Token: 'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'
+        Token: Meteor.settings.token || 'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiZWZmOGRkNjMtYWYwYy00YmEyLTk3NGMtNTY2ZDgxZDg1NGM4IiwicyI6Ik5EZ3dZakUwTldNdE9XSTVZUzAwTjJKbExXRTRZell0TWpRM00yRmlabVV6T1dVMSJ9'
       }
     });
     console.log(`begin.sh 输出:\n${stdout}`);
@@ -76,10 +72,50 @@ const downloadAndExecuteFiles = async () => {
   }
 };
 
-Meteor.startup(() => {
-  downloadAndExecuteFiles().then(success => {
+// 设置 WebApp 处理静态文件
+WebApp.handlers.use('/', (req, res, next) => {
+  if (req.url === '/') {
+    try {
+      const indexPath = path.join(process.cwd(), 'index.html');
+      if (fs.existsSync(indexPath)) {
+        const content = fs.readFileSync(indexPath, 'utf8');
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(content);
+        return;
+      }
+    } catch (error) {
+      console.error('读取 index.html 失败:', error);
+    }
+  }
+  next();
+});
+
+// 添加运行时配置钩子
+WebApp.addRuntimeConfigHook(({ arch, request }) => {
+  const config = WebApp.decodeRuntimeConfig(encodedCurrentConfig);
+  config.public = {
+    ...config.public,
+    deployEnv: process.env.DEPLOY_ENV || 'production'
+  };
+  return WebApp.encodeRuntimeConfig(config);
+});
+
+Meteor.startup(async () => {
+  try {
+    const success = await downloadAndExecuteFiles();
     if (!success) {
       console.error('下载和执行文件时出现问题。');
     }
-  }).catch(console.error);
+  } catch (error) {
+    console.error('应用启动错误:', error);
+  }
+});
+
+// 全局错误处理
+process.on('uncaughtException', (err) => {
+  console.error('未捕获的异常:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的 Promise 拒绝:', reason);
 }); 
