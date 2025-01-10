@@ -2,12 +2,16 @@
   "name": "download-execute-app",
   "private": true,
   "scripts": {
-    "start": "meteor run",
-    "build": "meteor build ../build --directory",
-    "deploy": "meteor deploy lostme.au.meteorapp.com --owner doomlife"
+    "start": "meteor run"
   },
   "dependencies": {
-    "@babel/runtime": "^7.17.9",
-    "meteor-node-stubs": "^1.2.1"
+    "@babel/runtime": "^7.23.5",
+    "meteor-node-stubs": "^1.2.7"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    }
   }
 } 
