@@ -1,0 +1,19 @@
+<head>
+  <title>下载执行应用</title>
+</head>
+
+<body>
+  {{> App_body}}
+</body>
+
+<template name="App_body">
+  <div class="container">
+    {{> Template.dynamic template=main}}
+  </div>
+</template>
+
+<template name="Home">
+  <div>
+    {{> Template.contentBlock}}
+  </div>
+</template> 
