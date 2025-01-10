@@ -1,19 +1,36 @@
 {
-  "name": "my-meteor-project",
+  "name": "meteor-app",
   "version": "1.0.0",
+  "description": "A Meteor app with file download and script execution",
+  "main": "server/main.js",
   "scripts": {
-    "start": "meteor run"
+    "start": "meteor run",
+    "test": "meteor test"
   },
   "dependencies": {
-    "meteor-node-stubs": "^1.0.1"
+    "meteor": "^2.7.3",                     // Meteor 核心依赖
+    "webapp": "^1.9.0",                     // WebApp 包，提供连接请求的能力
+    "http": "^1.5.0",                       // HTTP 包，允许 HTTP 请求的处理
+    "fs": "0.0.1-security",                 // fs 文件系统（Node.js 内置模块，作为依赖形式出现）
+    "path": "^0.12.7",                      // path 模块（Node.js 内置模块）
+    "child_process": "^1.0.2",              // child_process 模块（Node.js 内置模块）
+    "util": "^0.12.4",                      // util 模块（Node.js 内置模块）
+    "express": "^4.17.1",                   // 如果你使用 Express 作为 HTTP 服务器（可能用于代理等）
+    "http-proxy-middleware": "^1.0.6",      // 如果你的项目需要代理功能（从前端到后端）
+    "promisify": "^0.2.0"                   // 用于将回调函数转为 Promise 的工具
   },
   "devDependencies": {
-    "meteor": "^2.7.3"
+    "nodemon": "^2.0.7",                    // 用于开发时自动重启应用的工具
+    "eslint": "^7.32.0"                     // 用于代码检查的工具，确保代码质量
   },
   "meteor": {
     "mainModule": {
       "client": "client/main.js",
       "server": "server/main.js"
     }
+  },
+  "engines": {
+    "node": "14.x",                         // 指定 Node.js 版本（根据你的实际需求）
+    "npm": "6.x"                            // 指定 NPM 版本（根据你的实际需求）
   }
 }
