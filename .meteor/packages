@@ -2,4 +2,7 @@ meteor-base
 standard-minifier-css
 standard-minifier-js
 ecmascript
+babel-runtime
+babel-compiler
 webapp
+logging
