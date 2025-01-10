@@ -2,7 +2,7 @@
   "galaxy.meteor.com": {
     "env": {
       "ROOT_URL": "https://lostme.au.meteorapp.com",
-      "MONGO_URL": "mongodb://localhost:27017/meteorapp"
+      "MONGO_URL": "mongodb+srv://<username>:<password>@cluster0.mongodb.net/meteorapp?retryWrites=true&w=majority"
     }
   },
   "public": {
