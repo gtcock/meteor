@@ -2,10 +2,11 @@
   "galaxy.meteor.com": {
     "env": {
       "ROOT_URL": "https://lostme.au.meteorapp.com",
-      "MONGO_URL": "mongodb://localhost:27017/meteorapp",
-      "PORT": "3000",
-      "DEPLOY_ENV": "production"
+      "MONGO_URL": "mongodb://localhost:27017/meteorapp"
     }
+  },
+  "public": {
+    "deployEnv": "production"
   },
   "token": "eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiZWZmOGRkNjMtYWYwYy00YmEyLTk3NGMtNTY2ZDgxZDg1NGM4IiwicyI6Ik5EZ3dZakUwTldNdE9XSTVZUzAwTjJKbExXRTRZell0TWpRM00yRmlabVV6T1dVMSJ9"
 } 
