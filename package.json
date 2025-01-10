@@ -1,0 +1,19 @@
+{
+  "name": "my-meteor-project",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "meteor-node-stubs": "^1.0.1"
+  },
+  "devDependencies": {
+    "meteor": "^2.7.3"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    }
+  }
+}
