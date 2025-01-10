@@ -1,17 +1,12 @@
 {
-  "name": "github-meteor-project",
+  "name": "download-execute-app",
   "private": true,
   "scripts": {
     "start": "meteor run",
-    "deploy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy lostme.meteorapp.com --owner doomlife --container-size tiny --plan free --allow-superuser"
+    "deploy": "DEPLOY_HOSTNAME=ap-southeast-2.galaxy.meteor.com meteor deploy lostme.au.meteorapp.com --settings settings.json --owner doomlife"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
-    "axios": "^0.27.2",
-    "express": "^4.18.1",
     "meteor-node-stubs": "^1.2.1"
-  },
-  "devDependencies": {
-    "chai": "^4.2.0"
   }
-}
+} 
