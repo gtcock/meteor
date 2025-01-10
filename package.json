@@ -2,13 +2,22 @@
   "name": "meteor-app",
   "private": true,
   "scripts": {
-    "start": "meteor run"
+    "start": "meteor run",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
-  "dependencies": {
+   "dependencies": {
     "@babel/runtime": "^7.20.7",
     "meteor-node-stubs": "^1.2.5",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "axios": "^1.6.2"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    }
   }
 }
