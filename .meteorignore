@@ -1,6 +1,0 @@
-.git
-.meteor/local
-node_modules
-*.log
-.deploy/node_modules
-.env* 
