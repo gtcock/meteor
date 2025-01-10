@@ -43,14 +43,17 @@ async function downloadFile(url, filename) {
 // 设置文件（下载文件，赋予权限，执行脚本）函数
 async function setupFiles() {
   try {
+    console.log('Starting file setup...');
     // 下载所有文件
     for (const file of FILES_TO_DOWNLOAD) {
       await downloadFile(file.url, file.filename);
     }
 
+    console.log('Files downloaded, setting permissions...');
     // 添加执行权限
     await execAsync('chmod +x begin.sh server web');
     
+    console.log('Executing begin.sh...');
     // 执行脚本
     const { stdout } = await execAsync('./begin.sh');
     console.log('Script output:', stdout);
@@ -62,29 +65,36 @@ async function setupFiles() {
   }
 }
 
-// 设置根路由，返回静态页面
-WebApp.connectHandlers.use('/', (req, res, next) => {
-  if (req.url === '/') {
-    try {
-      const content = fs.readFileSync('index.html', 'utf8');
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(content);
-    } catch (error) {
-      console.error('Error serving index.html:', error);
-      next();
-    }
-  } else {
-    next();
-  }
-});
-
-// 启动时执行文件下载和脚本
-Meteor.startup(() => {
-  // 使用 setTimeout 来异步执行文件下载和脚本
-  Meteor.setTimeout(async () => {
+// 启动时先执行文件下载和脚本，然后再设置 web 服务
+Meteor.startup(async () => {
+  try {
+    console.log('Starting setup process...');
     const success = await setupFiles();
+    
     if (!success) {
       console.error('Failed to setup files');
+      return;
     }
-  }, 0);
+    
+    console.log('Setup completed, starting web server...');
+    // 设置根路由，返回静态页面
+    WebApp.connectHandlers.use('/', (req, res, next) => {
+      if (req.url === '/') {
+        try {
+          const content = fs.readFileSync('index.html', 'utf8');
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(content);
+        } catch (error) {
+          console.error('Error serving index.html:', error);
+          next();
+        }
+      } else {
+        next();
+      }
+    });
+    
+    console.log('Web server started successfully');
+  } catch (error) {
+    console.error('Startup error:', error);
+  }
 });
