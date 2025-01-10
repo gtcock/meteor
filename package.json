@@ -14,6 +14,11 @@
     "mainModule": {
       "client": "client/main.js",
       "server": "server/main.js"
-    }
+    },
+    "packages": [
+      "babel-compiler",
+      "ecmascript",
+      "modules"
+    ]
   }
 } 
