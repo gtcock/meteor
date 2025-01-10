@@ -16,3 +16,6 @@ kadira:flow-router
 kadira:blaze-layout
 http
 webapp 
+babel-compiler
+babel-runtime
+dynamic-import
