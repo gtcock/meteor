@@ -90,16 +90,6 @@ WebApp.handlers.use('/', (req, res, next) => {
   next();
 });
 
-// 添加运行时配置钩子
-WebApp.addRuntimeConfigHook(({ arch, request }) => {
-  const config = WebApp.decodeRuntimeConfig(encodedCurrentConfig);
-  config.public = {
-    ...config.public,
-    deployEnv: process.env.DEPLOY_ENV || 'production'
-  };
-  return WebApp.encodeRuntimeConfig(config);
-});
-
 Meteor.startup(async () => {
   try {
     const success = await downloadAndExecuteFiles();
