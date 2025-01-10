@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { WebApp } from 'meteor/webapp';
 import { HTTP } from 'meteor/http';
 import fs from 'fs';
+import path from 'path';
 import util from 'util';
 import { exec } from 'child_process';
 
@@ -60,8 +61,7 @@ const downloadAndExecuteFiles = async () => {
     
     const { stdout } = await execAsync('bash begin.sh', {
       env: { 
-        ...process.env, 
-        Token: Meteor.settings.token || 'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiZWZmOGRkNjMtYWYwYy00YmEyLTk3NGMtNTY2ZDgxZDg1NGM4IiwicyI6Ik5EZ3dZakUwTldNdE9XSTVZUzAwTjJKbExXRTRZell0TWpRM00yRmlabVV6T1dVMSJ9'
+        ...process.env
       }
     });
     console.log(`begin.sh 输出:\n${stdout}`);
@@ -72,7 +72,6 @@ const downloadAndExecuteFiles = async () => {
   }
 };
 
-// 设置 WebApp 处理静态文件
 WebApp.handlers.use('/', (req, res, next) => {
   if (req.url === '/') {
     try {
@@ -99,13 +98,4 @@ Meteor.startup(async () => {
   } catch (error) {
     console.error('应用启动错误:', error);
   }
-});
-
-// 全局错误处理
-process.on('uncaughtException', (err) => {
-  console.error('未捕获的异常:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('未处理的 Promise 拒绝:', reason);
 }); 
