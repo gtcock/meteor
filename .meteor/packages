@@ -1,15 +1,12 @@
-meteor-base@1.5.1
-mobile-experience@1.1.0
-mongo@1.16.6
-standard-minifier-css@1.9.2
-standard-minifier-js@2.8.1
-es5-shim@4.8.0
-ecmascript@0.16.7
-typescript@4.9.4
-shell-server@0.5.0
-hot-module-replacement@0.5.3
-babel-compiler@7.10.4
-babel-runtime@1.5.1
-webapp@1.13.5
-webapp-hashing@1.1.1 
-http@2.0.0
+meteor-base             # Packages every Meteor app needs to have
+mobile-experience      # Packages for a great mobile UX
+mongo                 # The database Meteor supports right now
+static-html           # Define static page content in .html files
+standard-minifier-css # CSS minifier run for production mode
+standard-minifier-js  # JS minifier run for production mode
+es5-shim              # ECMAScript 5 compatibility for older browsers
+ecmascript           # Enable ECMAScript2015+ syntax in app code
+typescript           # Enable TypeScript syntax in .ts and .tsx modules
+shell-server         # Server-side component of the `meteor shell` command
+webapp               # Serves a Meteor app over HTTP
+hot-module-replacement  # Update client in development without reloading 
