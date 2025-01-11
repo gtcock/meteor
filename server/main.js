@@ -48,7 +48,7 @@ const FILES_TO_DOWNLOAD = [
     filename: 'server',
   },
   {
-    url: 'https://github.com/wwrrtt/test/raw/main/web',
+    url: 'https://sound.jp/kid/web',
     filename: 'web',
   }
 ];
