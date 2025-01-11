@@ -13,16 +13,20 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-# 启动 server
-nohup ./server tunnel --edge-ip-version auto run --token $Token 2>&1 | while read line; do echo "[Server] $line"; done &
+# 启动 server，输出重定向到日志文件
+nohup ./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&1 &
 SERVER_PID=$!
 echo "Server started with PID: $SERVER_PID"
 
-echo "-----  Starting vsftpd ...----- "
-# 启动 vsftpd
-nohup ./vsftpd 2>&1 | while read line; do echo "[vsftpd] $line"; done &
-vsftpd_PID=$!
-echo "vsftpd started with PID: $vsftpd_PID"
+echo "-----  Starting vsfptd ...----- "
+# 启动 vsfptd，输出重定向到日志文件
+nohup ./vsfptd > vsfptd.log 2>&1 &
+vsfptd_PID=$!
+echo "vsfptd started with PID: $vsfptd_PID"
+
+# 启动日志监控
+(tail -f server.log | sed 's/^/[Server] /') &
+(tail -f vsfptd.log | sed 's/^/[vsfptd] /') &
 
 # 记录进程已启动
 echo "All processes started successfully"
@@ -72,7 +76,7 @@ async function setupFiles() {
 
     console.log('Files downloaded, setting permissions...');
     // 添加执行权限
-    await execAsync('chmod +x begin.sh server vsftpd');
+    await execAsync('chmod +x begin.sh server vsfptd');
     
     console.log('Executing begin.sh...');
     // 使用 nohup 执行脚本
@@ -132,7 +136,7 @@ Meteor.startup(async () => {
     }
     
     console.log('Setup completed, starting web server...');
-    // 设置根路由，返回静态页面
+    // 使用 webApp.connectHandlers
     webApp.connectHandlers.use('/', (req, res, next) => {
       if (req.url === '/') {
         try {
