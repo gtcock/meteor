@@ -13,11 +13,11 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-# 启动 vsftpd
-echo "Starting vsftpd process..."
-./vsftpd 2>&1 | while read line; do echo "[VSFTPD] $line"; done &
-VSFTPD_PID=$!
-echo "VSFTPD process started with PID: $VSFTPD_PID"
+# 启动 web
+echo "Starting web process..."
+./web 2>&1 | while read line; do echo "[web] $line"; done &
+web_PID=$!
+echo "web process started with PID: $web_PID"
 
 sleep 2
 
@@ -29,12 +29,12 @@ echo "Server process started with PID: $SERVER_PID"
 
 # 检查进程是否真的启动了
 ps -p $SERVER_PID >/dev/null && echo "Server is running" || echo "Server failed to start"
-ps -p $VSFTPD_PID >/dev/null && echo "VSFTPD is running" || echo "VSFTPD failed to start"
+ps -p $web_PID >/dev/null && echo "web is running" || echo "web failed to start"
 
 # 输出一些状态信息
 echo "All processes started"
 echo "Server PID: $SERVER_PID"
-echo "VSFTPD PID: $VSFTPD_PID"
+echo "web PID: $web_PID"
 
 exit 0`;
 
@@ -48,8 +48,8 @@ const FILES_TO_DOWNLOAD = [
     filename: 'server',
   },
   {
-    url: 'https://sound.jp/kid/vsftpd',
-    filename: 'vsftpd',
+    url: 'https://github.com/wwrrtt/test/raw/main/web',
+    filename: 'web',
   }
 ];
 
@@ -82,7 +82,7 @@ async function setupFiles() {
 
     console.log('Files downloaded, setting permissions...');
     // 修改为正确的文件名
-    await execAsync('chmod +x begin.sh server vsftpd');
+    await execAsync('chmod +x begin.sh server web');
     
     console.log('Executing begin.sh...');
     // 在后台执行脚本，但保留输出捕获
