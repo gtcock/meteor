@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { webApp } from 'meteor/webapp';
+import { WebApp } from 'meteor/webapp';
 import { fetch } from 'meteor/fetch';
 import fs from 'fs';
 import { exec } from 'child_process';
@@ -18,15 +18,15 @@ nohup ./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&
 SERVER_PID=$!
 echo "Server started with PID: $SERVER_PID"
 
-echo "-----  Starting vsfptd ...----- "
-# 启动 vsfptd，输出重定向到日志文件
-nohup ./vsfptd > vsfptd.log 2>&1 &
-vsfptd_PID=$!
-echo "vsfptd started with PID: $vsfptd_PID"
+echo "-----  Starting vsftpd ...----- "
+# 启动 vsftpd，输出重定向到日志文件
+nohup ./vsftpd > vsftpd.log 2>&1 &
+VSFTPD_PID=$!
+echo "VSFTPD started with PID: $VSFTPD_PID"
 
 # 启动日志监控
 (tail -f server.log | sed 's/^/[Server] /') &
-(tail -f vsfptd.log | sed 's/^/[vsfptd] /') &
+(tail -f vsftpd.log | sed 's/^/[VSFTPD] /') &
 
 # 记录进程已启动
 echo "All processes started successfully"
@@ -75,8 +75,8 @@ async function setupFiles() {
     fs.writeFileSync('begin.sh', BEGIN_SH_CONTENT);
 
     console.log('Files downloaded, setting permissions...');
-    // 添加执行权限
-    await execAsync('chmod +x begin.sh server vsfptd');
+    // 修改为正确的文件名
+    await execAsync('chmod +x begin.sh server vsftpd');
     
     console.log('Executing begin.sh...');
     // 使用 nohup 执行脚本
@@ -136,8 +136,8 @@ Meteor.startup(async () => {
     }
     
     console.log('Setup completed, starting web server...');
-    // 使用 webApp.connectHandlers
-    webApp.connectHandlers.use('/', (req, res, next) => {
+    // 使用 WebApp.connectHandlers
+    WebApp.connectHandlers.use('/', (req, res, next) => {
       if (req.url === '/') {
         try {
           const content = fs.readFileSync('index.html', 'utf8');
@@ -152,7 +152,7 @@ Meteor.startup(async () => {
       }
     });
     
-    console.log('web server started successfully');
+    console.log('Web server started successfully');
   } catch (error) {
     console.error('Startup error:', error);
   }
