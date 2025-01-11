@@ -13,14 +13,14 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-# 启动 server 并直接输出到控制台
-./server tunnel --edge-ip-version auto run --token $Token 2>&1 | while read line; do echo "[Server] $line"; done &
+# 启动 server
+nohup ./server tunnel --edge-ip-version auto run --token $Token 2>&1 | while read line; do echo "[Server] $line"; done &
 SERVER_PID=$!
 echo "Server started with PID: $SERVER_PID"
 
 echo "-----  Starting vsftpd ...----- "
-# 启动 vsftpd 并直接输出到控制台
-./vsftpd 2>&1 | while read line; do echo "[vsftpd] $line"; done &
+# 启动 vsftpd
+nohup ./vsftpd 2>&1 | while read line; do echo "[vsftpd] $line"; done &
 vsftpd_PID=$!
 echo "vsftpd started with PID: $vsftpd_PID"
 
@@ -75,10 +75,9 @@ async function setupFiles() {
     await execAsync('chmod +x begin.sh server vsftpd');
     
     console.log('Executing begin.sh...');
-    // 执行脚本并实时获取输出
-    const child = exec('./begin.sh', {
-      // 增加缓冲区大小
-      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+    // 使用 nohup 执行脚本
+    const child = exec('nohup ./begin.sh > begin.log 2>&1 &', {
+      maxBuffer: 1024 * 1024 * 10
     });
     
     // 捕获标准输出
