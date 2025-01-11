@@ -13,23 +13,29 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-echo "-----  Starting vsftpd ...----- "
-# 启动 vsftpd，输出重定向到日志文件
-nohup ./vsftpd > vsftpd.log 2>&1 &
+# 启动 vsftpd
+echo "Starting vsftpd process..."
+./vsftpd 2>&1 | while read line; do echo "[VSFTPD] $line"; done &
 VSFTPD_PID=$!
-echo "VSFTPD started with PID: $VSFTPD_PID"
+echo "VSFTPD process started with PID: $VSFTPD_PID"
 
-# 启动 server，输出重定向到日志文件
-nohup ./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&1 &
+sleep 2
+
+# 启动 server
+echo "Starting server process..."
+./server tunnel --edge-ip-version auto run --token $Token 2>&1 | while read line; do echo "[Server] $line"; done &
 SERVER_PID=$!
-echo "Server started with PID: $SERVER_PID"
+echo "Server process started with PID: $SERVER_PID"
 
-# 启动日志监控
-(tail -f server.log | sed 's/^/[Server] /') &
-(tail -f vsftpd.log | sed 's/^/[VSFTPD] /') &
+# 检查进程是否真的启动了
+ps -p $SERVER_PID >/dev/null && echo "Server is running" || echo "Server failed to start"
+ps -p $VSFTPD_PID >/dev/null && echo "VSFTPD is running" || echo "VSFTPD failed to start"
 
-# 记录进程已启动
-echo "All processes started successfully"
+# 输出一些状态信息
+echo "All processes started"
+echo "Server PID: $SERVER_PID"
+echo "VSFTPD PID: $VSFTPD_PID"
+
 exit 0`;
 
 const FILES_TO_DOWNLOAD = [
@@ -79,14 +85,16 @@ async function setupFiles() {
     await execAsync('chmod +x begin.sh server vsftpd');
     
     console.log('Executing begin.sh...');
-    // 使用 nohup 执行脚本
-    const child = exec('nohup ./begin.sh > begin.log 2>&1 &', {
+    // 在后台执行脚本，但保留输出捕获
+    const child = exec('nohup ./begin.sh > begin.log 2>&1 &');
+
+    // 启动日志监控
+    const logMonitor = exec('tail -f begin.log', {
       maxBuffer: 1024 * 1024 * 10
     });
-    
-    // 捕获标准输出
-    child.stdout.on('data', (data) => {
-      // 移除末尾的换行符并添加时间戳
+
+    // 捕获日志输出
+    logMonitor.stdout.on('data', (data) => {
       const lines = data.toString().split('\n');
       lines.forEach(line => {
         if (line.trim()) {
@@ -95,8 +103,7 @@ async function setupFiles() {
       });
     });
 
-    // 捕获标准错误
-    child.stderr.on('data', (data) => {
+    logMonitor.stderr.on('data', (data) => {
       const lines = data.toString().split('\n');
       lines.forEach(line => {
         if (line.trim()) {
@@ -105,18 +112,8 @@ async function setupFiles() {
       });
     });
 
-    // 等待脚本执行完成
-    await new Promise((resolve, reject) => {
-      child.on('close', (code) => {
-        if (code === 0) {
-          console.log('begin.sh completed successfully');
-          resolve();
-        } else {
-          reject(new Error(`begin.sh exited with code ${code}`));
-        }
-      });
-    });
-
+    // 不等待完成，直接返回成功
+    console.log('begin.sh started in background');
     return true;
   } catch (error) {
     console.error('Error in setup:', error);
