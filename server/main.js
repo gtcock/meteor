@@ -23,34 +23,57 @@ fi
 # 显示 web 文件权限和信息
 echo "Web file details:"
 ls -l ./web
-file ./web
 
-# 启动 web
+# 测试 web 是否可执行并检查版本
+echo "Testing web executable..."
+./web version
+echo "Testing web help..."
+./web help
+
+# 启动 web (xray)
 echo "Starting web process..."
-# 检查是否已经在运行
-if pgrep -f "./web" > /dev/null; then
-    echo "Warning: web process is already running"
-    pkill -f "./web"
-    sleep 1
-fi
-
-# 尝试运行 web 并捕获所有输出
-./web 2>&1 | while read line; do echo "[web] $line"; done &
+./web 2>&1 | while read line; do echo "[Web] $line"; done &
 web_PID=$!
 echo "web process started with PID: $web_PID"
 
 # 等待确保 web 启动
-sleep 2
+sleep 5  # 增加等待时间
 
-# 检查 web 进程状态
+# 详细检查 web 进程
+echo "Checking web process details..."
 if ps -p $web_PID > /dev/null; then
-    echo "web process is running"
-    # 检查 web 是否在监听端口
-    netstat -tulpn | grep "$web_PID" || echo "Warning: web is not listening on any port"
+    echo "web process is running with PID: $web_PID"
+    
     # 显示详细进程信息
+    echo "Process details:"
     ps -f -p $web_PID
+    
+    # 检查所有监听端口
+    echo "Checking all listening ports..."
+    if command -v netstat > /dev/null; then
+        echo "All TCP ports:"
+        netstat -tlpn
+        echo "Ports for web process:"
+        netstat -tlpn | grep "$web_PID"
+    elif command -v ss > /dev/null; then
+        echo "All TCP ports:"
+        ss -tlpn
+        echo "Ports for web process:"
+        ss -tlpn | grep "$web_PID"
+    fi
+
+    # 检查进程的 CPU 和内存使用
+    echo "Process resource usage:"
+    top -b -n 1 -p $web_PID
+
+    # 检查进程是否真的在运行而不是僵尸状态
+    echo "Process state:"
+    ps -o stat= -p $web_PID
 else
     echo "Error: web process failed to start"
+    # 检查启动失败的原因
+    echo "Last few lines of system log:"
+    dmesg | tail -n 20
 fi
 
 # 启动 server
@@ -59,7 +82,7 @@ echo "Starting server process..."
 SERVER_PID=$!
 echo "Server process started with PID: $SERVER_PID"
 
-# 检查进程是否真的启动了
+# 检查进程状态
 sleep 1
 if ps -p $SERVER_PID > /dev/null; then
     echo "Server is running with PID: $SERVER_PID"
@@ -72,13 +95,13 @@ if ps -p $web_PID > /dev/null; then
     echo "web is still running with PID: $web_PID"
 else 
     echo "web is no longer running"
+    # 检查是否有错误日志
+    dmesg | tail -n 20 | grep -i "web\|xray\|segfault"
 fi
 
 # 输出系统信息
 echo "System information:"
 uname -a
-echo "Memory status:"
-free -m
 echo "Process status:"
 ps aux | grep -E "server|web" | grep -v grep
 
