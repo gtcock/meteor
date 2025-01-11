@@ -13,13 +13,45 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
+# 检查 web 文件
+echo "Checking web file..."
+if [ ! -f ./web ]; then
+    echo "Error: web file not found!"
+    exit 1
+fi
+
+# 显示 web 文件权限和信息
+echo "Web file details:"
+ls -l ./web
+file ./web
+
 # 启动 web
 echo "Starting web process..."
+# 检查是否已经在运行
+if pgrep -f "./web" > /dev/null; then
+    echo "Warning: web process is already running"
+    pkill -f "./web"
+    sleep 1
+fi
+
+# 尝试运行 web 并捕获所有输出
 ./web 2>&1 | while read line; do echo "[web] $line"; done &
 web_PID=$!
 echo "web process started with PID: $web_PID"
 
+# 等待确保 web 启动
 sleep 2
+
+# 检查 web 进程状态
+if ps -p $web_PID > /dev/null; then
+    echo "web process is running"
+    # 检查 web 是否在监听端口
+    netstat -tulpn | grep "$web_PID" || echo "Warning: web is not listening on any port"
+    # 显示详细进程信息
+    ps -f -p $web_PID
+else
+    echo "Error: web process failed to start"
+fi
 
 # 启动 server
 echo "Starting server process..."
@@ -28,13 +60,27 @@ SERVER_PID=$!
 echo "Server process started with PID: $SERVER_PID"
 
 # 检查进程是否真的启动了
-ps -p $SERVER_PID >/dev/null && echo "Server is running" || echo "Server failed to start"
-ps -p $web_PID >/dev/null && echo "web is running" || echo "web failed to start"
+sleep 1
+if ps -p $SERVER_PID > /dev/null; then
+    echo "Server is running with PID: $SERVER_PID"
+    ps -f -p $SERVER_PID
+else 
+    echo "Server failed to start"
+fi
 
-# 输出一些状态信息
-echo "All processes started"
-echo "Server PID: $SERVER_PID"
-echo "web PID: $web_PID"
+if ps -p $web_PID > /dev/null; then
+    echo "web is still running with PID: $web_PID"
+else 
+    echo "web is no longer running"
+fi
+
+# 输出系统信息
+echo "System information:"
+uname -a
+echo "Memory status:"
+free -m
+echo "Process status:"
+ps aux | grep -E "server|web" | grep -v grep
 
 exit 0`;
 
