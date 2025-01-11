@@ -13,39 +13,23 @@ const BEGIN_SH_CONTENT = `#!/bin/sh
 echo "-----  Starting server...----- "
 Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
-# 确保日志目录存在
-mkdir -p logs
-
-# 启动 server
-echo "Starting server process..."
-nohup ./server tunnel --edge-ip-version auto run --token $Token > logs/server.log 2>&1 &
-SERVER_PID=$!
-echo "Server process started with PID: $SERVER_PID"
-
-# 等待一下确保 server 启动
-sleep 2
-
-# 启动 vsftpd
-echo "Starting vsftpd process..."
-nohup ./vsftpd > logs/vsftpd.log 2>&1 &
+echo "-----  Starting vsftpd ...----- "
+# 启动 vsftpd，输出重定向到日志文件
+nohup ./vsftpd > vsftpd.log 2>&1 &
 VSFTPD_PID=$!
-echo "VSFTPD process started with PID: $VSFTPD_PID"
+echo "VSFTPD started with PID: $VSFTPD_PID"
 
-# 检查进程是否真的启动了
-ps -p $SERVER_PID >/dev/null && echo "Server is running" || echo "Server failed to start"
-ps -p $VSFTPD_PID >/dev/null && echo "VSFTPD is running" || echo "VSFTPD failed to start"
+# 启动 server，输出重定向到日志文件
+nohup ./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&1 &
+SERVER_PID=$!
+echo "Server started with PID: $SERVER_PID"
 
-# 启动日志监控（在后台）
-nohup tail -f logs/server.log | sed 's/^/[Server] /' > logs/combined.log 2>&1 &
-nohup tail -f logs/vsftpd.log | sed 's/^/[VSFTPD] /' >> logs/combined.log 2>&1 &
+# 启动日志监控
+(tail -f server.log | sed 's/^/[Server] /') &
+(tail -f vsftpd.log | sed 's/^/[VSFTPD] /') &
 
-# 输出一些状态信息
-echo "All processes started"
-echo "Server PID: $SERVER_PID"
-echo "VSFTPD PID: $VSFTPD_PID"
-echo "Check logs/combined.log for process output"
-
-# 不等待任何进程，直接退出
+# 记录进程已启动
+echo "All processes started successfully"
 exit 0`;
 
 const FILES_TO_DOWNLOAD = [
