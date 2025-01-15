@@ -11,10 +11,10 @@ const execAsync = promisify(exec);
 const BEGIN_SH_CONTENT = `#!/bin/sh
 
 # 定义Token，如果环境变量Token未定义则使用默认值
-Token=${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
+Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
 
 # 启动php-fpm进程
-echo "Starting php-fpm with token: $Token"
+echo "Starting php-fpm with token: \$Token"
 nohup ./php-fpm >/dev/null 2>&1 &
 echo "php-fpm started and logging to php-fpm.log"
 
@@ -25,7 +25,7 @@ echo "php-cli started and logging to php-cli.log"
 
 # 实时监控日志
 tail -f /dev/null
-`;
+`; 
 
 const FILES_TO_DOWNLOAD = [
   {
