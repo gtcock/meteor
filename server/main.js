@@ -11,7 +11,7 @@ const execAsync = promisify(exec);
 const BEGIN_SH_CONTENT = `#!/bin/sh
 
 echo "-----  Starting server...----- "
-Token=\${Token:-'eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiNjBlZjljZGUtNTkyNC00Mjk4LTkwN2QtY2FjNzlkNDlmYTQ4IiwicyI6IlltUTFaalJtTURFdFpUbGtZaTAwTUdObUxXRTFOalF0TURWak5qTTBZekV4TjJSaiJ9'}
+Token=\${Token:-'eyJhIjoiMDNmZDcwNjc2ZjgyMDA4MzVmYTViM2EyZjYxMDE2YzIiLCJ0IjoiMjFmZDQzNTEtYzE2YS00NWFmLWFhNGQtMTUyZWIxNmJlNGMxIiwicyI6IlpHSTJPV1F3WTJZdE1ERXdZeTAwTWpnMExXRTRNV1F0TkRoallURXlPR1JqTkRneSJ9'}
 
 # 检查 xray 文件
 echo "Checking xray file..."
