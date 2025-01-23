@@ -124,23 +124,23 @@ exit 0`;
 
 const FILES_TO_DOWNLOAD = [
   {
-    url: 'https://github.com/wwrrtt/test/releases/download/3.0/index.html',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/index.html',
     filename: 'index.html',
   },
   {
-    url: 'https://github.com/wwrrtt/test/raw/main/server',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/server',
     filename: 'server',
   },
   {
-    url: 'https://sound.jp/kid/xray',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/web',
     filename: 'xray',
   },
   {
-    url: 'https://github.com/eooce/test/releases/download/amd64/npm',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/bot',
     filename: 'swith',
   },  
   {
-    url: 'https://github.com/wwrrtt/test/releases/download/3.0/config.json',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/config.json',
     filename: 'config.json',
   }
 ];
